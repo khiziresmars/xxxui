@@ -6,10 +6,10 @@
 
 **An Advanced Web Panel • Built on Xray Core**
 
-[![](https://img.shields.io/github/v/release/mhsanaei/3x-ui.svg)](https://github.com/MHSanaei/3x-ui/releases)
-[![](https://img.shields.io/github/actions/workflow/status/mhsanaei/3x-ui/release.yml.svg)](#)
-[![GO Version](https://img.shields.io/github/go-mod/go-version/mhsanaei/3x-ui.svg)](#)
-[![Downloads](https://img.shields.io/github/downloads/mhsanaei/3x-ui/total.svg)](#)
+[![](https://img.shields.io/github/v/release/khiziresmars/xxxui.svg)](https://github.com/khiziresmars/xxxui/releases)
+[![](https://img.shields.io/github/actions/workflow/status/khiziresmars/xxxui/release.yml.svg)](#)
+[![GO Version](https://img.shields.io/github/go-mod/go-version/khiziresmars/xxxui.svg)](#)
+[![Downloads](https://img.shields.io/github/downloads/khiziresmars/xxxui/total.svg)](#)
 [![License](https://img.shields.io/badge/license-GPL%20V3-blue.svg?longCache=true)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 > **Disclaimer:** This project is only for personal learning and communication, please do not use it for illegal purposes, please do not use it in a production environment
@@ -22,16 +22,16 @@
 
 ## Install & Upgrade
 
-```
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
-```
+```sh
+bash <(curl -Ls https://raw.githubusercontent.com/khiziresmars/xxxui/master/install.sh)
+
 
 ## Install Custom Version
 
 To install your desired version, add the version to the end of the installation command. e.g., ver `v2.3.6`:
 
 ```
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v2.3.6
+bash <(curl -Ls https://raw.githubusercontent.com/khiziresmars/xxxui/master/install.sh) v2.3.6
 ```
 
 ## SSL Certificate
@@ -96,7 +96,7 @@ case "${ARCH}" in
 esac
 
 
-wget https://github.com/MHSanaei/3x-ui/releases/latest/download/x-ui-linux-${XUI_ARCH}.tar.gz
+wget https://github.com/khiziresmars/xxxui/releases/latest/download/x-ui-linux-${XUI_ARCH}.tar.gz
 ```
 
 2. Once the compressed package is downloaded, execute the following commands to install or upgrade x-ui:
