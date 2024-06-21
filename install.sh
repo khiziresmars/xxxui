@@ -64,126 +64,48 @@ elif [[ "${release}" == "fedora" ]]; then
         echo -e "${red} Please use Fedora 36 or higher version!${plain}\n" && exit 1
     fi
 elif [[ "${release}" == "debian" ]]; then
-    if [[ ${os_version} -lt 11 ]]; then
-        echo -e "${red} Please use Debian 11 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "almalinux" ]]; then
-    if [[ ${os_version} -lt 9 ]]; then
-        echo -e "${red} Please use AlmaLinux 9 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "rocky" ]]; then
-    if [[ ${os_version} -lt 9 ]]; then
-        echo -e "${red} Please use Rocky Linux 9 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "oracle" ]]; then
-    if [[ ${os_version} -lt 8 ]]; then
-        echo -e "${red} Please use Oracle Linux 8 or higher ${plain}\n" && exit 1
+    if [[ ${os_version} -lt 10 ]]; then
+        echo -e "${red} Please use Debian 10 or higher version!${plain}\n" && exit 1
     fi
 else
-    echo -e "${red}Your operating system is not supported by this script.${plain}\n"
-    echo "Please ensure you are using one of the following supported operating systems:"
-    echo "- Ubuntu 20.04+"
-    echo "- Debian 11+"
-    echo "- CentOS 8+"
-    echo "- Fedora 36+"
-    echo "- Arch Linux"
-    echo "- Parch Linux"
-    echo "- Manjaro"
-    echo "- Armbian"
-    echo "- AlmaLinux 9+"
-    echo "- Rocky Linux 9+"
-    echo "- Oracle Linux 8+"
-    echo "- OpenSUSE Tumbleweed"
-    exit 1
-
+    echo -e "${red}The script does not support the current system, please contact the author!${plain}\n" && exit 1
 fi
 
 install_base() {
-    case "${release}" in
-    ubuntu | debian | armbian)
-        apt-get update && apt-get install -y -q wget curl tar tzdata
-        ;;
-    centos | almalinux | rocky | oracle)
-        yum -y update && yum install -y -q wget curl tar tzdata
-        ;;
-    fedora)
-        dnf -y update && dnf install -y -q wget curl tar tzdata
-        ;;
-    arch | manjaro | parch)
-        pacman -Syu && pacman -Syu --noconfirm wget curl tar tzdata
-        ;;
-    opensuse-tumbleweed)
-        zypper refresh && zypper -q install -y wget curl tar timezone
-        ;;
-    *)
-        apt-get update && apt install -y -q wget curl tar tzdata
-        ;;
-    esac
+    if [[ "${release}" == "centos" ]]; then
+        yum install -y wget curl tar
+    elif [[ "${release}" == "ubuntu" || "${release}" == "debian" ]]; then
+        apt update
+        apt install -y wget curl tar
+    elif [[ "${release}" == "fedora" ]]; then
+        dnf install -y wget curl tar
+    elif [[ "${release}" == "arch" || "${release}" == "manjaro" ]]; then
+        pacman -Syu --noconfirm wget curl tar
+    else
+        echo -e "${red}OS not supported, please contact the author!${plain}\n"
+        exit 1
+    fi
 }
 
-# This function will be called when user installed x-ui out of security
 config_after_install() {
-    echo -e "${yellow}Install/update finished! For security it's recommended to modify panel settings ${plain}"
-    read -p "Do you want to continue with the modification [y/n]?": config_confirm
-    if [[ "${config_confirm}" == "y" || "${config_confirm}" == "Y" ]]; then
-        read -p "Please set up your username: " config_account
-        echo -e "${yellow}Your username will be: ${config_account}${plain}"
-        read -p "Please set up your password: " config_password
-        echo -e "${yellow}Your password will be: ${config_password}${plain}"
-        read -p "Please set up the panel port: " config_port
-        echo -e "${yellow}Your panel port is: ${config_port}${plain}"
-        read -p "Please set up the web base path (ip:port/webbasepath/): " config_webBasePath
-        echo -e "${yellow}Your web base path is: ${config_webBasePath}${plain}"
-        echo -e "${yellow}Initializing, please wait...${plain}"
-        /usr/local/x-ui/x-ui setting -username ${config_account} -password ${config_password}
-        echo -e "${yellow}Account name and password set successfully!${plain}"
-        /usr/local/x-ui/x-ui setting -port ${config_port}
-        echo -e "${yellow}Panel port set successfully!${plain}"
-        /usr/local/x-ui/x-ui setting -webBasePath ${config_webBasePath}
-        echo -e "${yellow}Web base path set successfully!${plain}"
-    else
-        echo -e "${red}Cancel...${plain}"
-        if [[ ! -f "/etc/x-ui/x-ui.db" ]]; then
-            local usernameTemp=$(head -c 6 /dev/urandom | base64)
-            local passwordTemp=$(head -c 6 /dev/urandom | base64)
-            local webBasePathTemp=$(head -c 6 /dev/urandom | base64)
-            /usr/local/x-ui/x-ui setting -username ${usernameTemp} -password ${passwordTemp} -webBasePath ${webBasePathTemp}
-            echo -e "This is a fresh installation, will generate random login info for security concerns:"
-            echo -e "###############################################"
-            echo -e "${green}Username: ${usernameTemp}${plain}"
-            echo -e "${green}Password: ${passwordTemp}${plain}"
-            echo -e "${green}WebBasePath: ${webBasePathTemp}${plain}"
-            echo -e "###############################################"
-            echo -e "${red}If you forgot your login info, you can type x-ui and then type 8 to check after installation${plain}"
-        else
-            echo -e "${red}This is your upgrade, will keep old settings. If you forgot your login info, you can type x-ui and then type 8 to check${plain}"
-        fi
-    fi
-    /usr/local/x-ui/x-ui migrate
+    echo -e "${yellow}Please visit the URL to get your panel login information: ${plain}"
+    echo -e "${green}https://github.com/khiziresmars/xxxui${plain}"
 }
 
 install_x-ui() {
-    cd /usr/local/
-
-    if [ $# == 0 ]; then
-        last_version=$(curl -Ls "https://api.github.com/repos/MHSanaei/3x-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-        if [[ ! -n "$last_version" ]]; then
-            echo -e "${red}Failed to fetch x-ui version, it maybe due to Github API restrictions, please try it later${plain}"
-            exit 1
-        fi
-        echo -e "Got x-ui latest version: ${last_version}, beginning the installation..."
-        wget -N --no-check-certificate -O /usr/local/x-ui-linux-$(arch).tar.gz https://github.com/MHSanaei/3x-ui/releases/download/${last_version}/x-ui-linux-$(arch).tar.gz
+    echo -e "${green}Downloading the latest version of x-ui...${plain}"
+    
+    if [[ ! $1 ]]; then
+        last_version=$(curl -s "https://api.github.com/repos/khiziresmars/xxxui/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+        wget -O /usr/local/x-ui/x-ui-linux-$(arch).tar.gz https://github.com/khiziresmars/xxxui/releases/download/${last_version}/x-ui-linux-$(arch).tar.gz
         if [[ $? -ne 0 ]]; then
-            echo -e "${red}Downloading x-ui failed, please be sure that your server can access Github ${plain}"
+            echo -e "${red}Failed to download x-ui ${last_version}, please check if the version exists!${plain}"
             exit 1
         fi
     else
-        last_version=$1
-        url="https://github.com/MHSanaei/3x-ui/releases/download/${last_version}/x-ui-linux-$(arch).tar.gz"
-        echo -e "Beginning to install x-ui $1"
-        wget -N --no-check-certificate -O /usr/local/x-ui-linux-$(arch).tar.gz ${url}
+        wget -O /usr/local/x-ui/x-ui-linux-$(arch).tar.gz https://github.com/khiziresmars/xxxui/releases/download/$1/x-ui-linux-$(arch).tar.gz
         if [[ $? -ne 0 ]]; then
-            echo -e "${red}Download x-ui $1 failed,please check the version exists ${plain}"
+            echo -e "${red}Download x-ui $1 failed, please check the version exists ${plain}"
             exit 1
         fi
     fi
@@ -193,9 +115,9 @@ install_x-ui() {
         rm /usr/local/x-ui/ -rf
     fi
 
-    tar zxvf x-ui-linux-$(arch).tar.gz
-    rm x-ui-linux-$(arch).tar.gz -f
-    cd x-ui
+    tar zxvf /usr/local/x-ui/x-ui-linux-$(arch).tar.gz -C /usr/local/x-ui/
+    rm /usr/local/x-ui/x-ui-linux-$(arch).tar.gz -f
+    cd /usr/local/x-ui/
     chmod +x x-ui
 
     # Check the system's architecture and rename the file accordingly
@@ -206,7 +128,7 @@ install_x-ui() {
 
     chmod +x x-ui bin/xray-linux-$(arch)
     cp -f x-ui.service /etc/systemd/system/
-    wget --no-check-certificate -O /usr/bin/x-ui https://raw.githubusercontent.com/MHSanaei/3x-ui/main/x-ui.sh
+    wget --no-check-certificate -O /usr/bin/x-ui https://raw.githubusercontent.com/khiziresmars/xxxui/main/x-ui.sh
     chmod +x /usr/local/x-ui/x-ui.sh
     chmod +x /usr/bin/x-ui
     config_after_install
